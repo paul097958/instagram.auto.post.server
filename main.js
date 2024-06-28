@@ -1,5 +1,4 @@
-import * as dotenv from "dotenv"
-dotenv.config()
+
 import { IgApiClient, IgLoginTwoFactorRequiredError } from 'instagram-private-api';
 import pkg from 'request-promise';
 const { get } = pkg;
@@ -8,10 +7,9 @@ import bodyParser from 'body-parser';
 import cors from 'cors'
 import Bluebird from 'bluebird';
 const app = express()
-import { db } from './config.js'
+import { db, IG_USERNAME, IG_PASSWORD, LINE_NOTIFY_TOKEN } from './config.js'
 import { doc, updateDoc, getDoc, getDocs, arrayRemove, collection, query, where } from "firebase/firestore";
 import fetch, { FormData } from "node-fetch"
-const TOKEN = "zddtPm7xjnW6CSEZqIF9pa2pZVS1TlXCvkHoY6MJY6n"
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
@@ -43,7 +41,7 @@ app.post('/send', async function (req, res) {
         method: 'POST',
         body: formdata,
         headers: {
-            Authorization: 'Bearer ' + TOKEN
+            Authorization: 'Bearer ' + LINE_NOTIFY_TOKEN
         }
     })
     let dataRes = await resPond.json()
@@ -76,7 +74,7 @@ async function sendErrorMessage(){
         method: 'POST',
         body: formData,
         headers: {
-            Authorization: 'Bearer ' + TOKEN
+            Authorization: 'Bearer ' + LINE_NOTIFY_TOKEN
         }
     })
     let data = await res.json();
@@ -147,7 +145,7 @@ async function fakeExists() {
 
 const postToInsta = async (url, time, theNumber) => {
     const ig = new IgApiClient();
-    ig.state.generateDevice(process.env.IG_USERNAME);
+    ig.state.generateDevice(IG_USERNAME);
     ig.request.end$.subscribe(async () => {
         const serialized = await ig.state.serialize();
         delete serialized.constants;
@@ -160,7 +158,7 @@ const postToInsta = async (url, time, theNumber) => {
             await sendErrorMessage()
         }
     } else {
-        return Bluebird.try(() => ig.account.login(process.env.IG_USERNAME, process.env.IG_PASSWORD)).catch(
+        return Bluebird.try(() => ig.account.login(IG_USERNAME, IG_PASSWORD)).catch(
             IgLoginTwoFactorRequiredError,
             async err => {
                 const { username, totp_two_factor_on, two_factor_identifier } = err.response.body.two_factor_info;

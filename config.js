@@ -19,5 +19,8 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const LINE_NOTIFY_TOKEN = ""
+const IG_USERNAME = ""
+const IG_PASSWORD = ""
 
-export { db }
+export { db, LINE_NOTIFY_TOKEN, IG_PASSWORD, IG_USERNAME }
